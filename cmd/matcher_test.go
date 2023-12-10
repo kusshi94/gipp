@@ -17,7 +17,7 @@ func TestParseIp(t *testing.T) {
 		{
 			description: "Not Compressed IPv6 Address",
 			ipStr:       "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
-			expectedIP:  cmd.IPv6Address{IP: [16]byte{
+			expectedIP: cmd.IPv6Address{IP: [16]byte{
 				0x20, 0x01, 0x0d, 0xb8, 0x85, 0xa3, 0x00, 0x00,
 				0x00, 0x00, 0x8a, 0x2e, 0x03, 0x70, 0x73, 0x34,
 			}},
@@ -26,7 +26,7 @@ func TestParseIp(t *testing.T) {
 		{
 			description: "Compressed IPv6 Address",
 			ipStr:       "2001:db8::abcd:01ff:fe00:0",
-			expectedIP:  cmd.IPv6Address{IP: [16]byte{
+			expectedIP: cmd.IPv6Address{IP: [16]byte{
 				0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
 				0xab, 0xcd, 0x01, 0xff, 0xfe, 0x00, 0x00, 0x00,
 			}},
@@ -35,7 +35,7 @@ func TestParseIp(t *testing.T) {
 		{
 			description: "Compressed IPv6 Address",
 			ipStr:       "2001:db8::50",
-			expectedIP:  cmd.IPv6Address{IP: [16]byte{
+			expectedIP: cmd.IPv6Address{IP: [16]byte{
 				0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50,
 			}},
@@ -44,7 +44,7 @@ func TestParseIp(t *testing.T) {
 		{
 			description: "Compressed IPv6 Address",
 			ipStr:       "::1",
-			expectedIP:  cmd.IPv6Address{IP: [16]byte{
+			expectedIP: cmd.IPv6Address{IP: [16]byte{
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
 			}},
@@ -53,7 +53,7 @@ func TestParseIp(t *testing.T) {
 		{
 			description: "Compressed IPv6 Address",
 			ipStr:       "2001:db8::",
-			expectedIP:  cmd.IPv6Address{IP: [16]byte{
+			expectedIP: cmd.IPv6Address{IP: [16]byte{
 				0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			}},
@@ -62,7 +62,7 @@ func TestParseIp(t *testing.T) {
 		{
 			description: "Shortest Compressed IPv6 Address",
 			ipStr:       "::",
-			expectedIP:  cmd.IPv6Address{IP: [16]byte{
+			expectedIP: cmd.IPv6Address{IP: [16]byte{
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			}},
@@ -71,7 +71,7 @@ func TestParseIp(t *testing.T) {
 		{
 			description: "Longest Compressed IPv6 Address",
 			ipStr:       "2001:db8::1:abcd:01ff:fe00:0",
-			expectedIP:  cmd.IPv6Address{IP: [16]byte{
+			expectedIP: cmd.IPv6Address{IP: [16]byte{
 				0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x01,
 				0xab, 0xcd, 0x01, 0xff, 0xfe, 0x00, 0x00, 0x00,
 			}},
@@ -153,7 +153,7 @@ func TestParseIPPattern(t *testing.T) {
 					0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
 					0xab, 0xcd, 0x01, 0xff, 0xfe, 0x00, 0x00, 0x00,
 				}},
-				MaskEnd:  128,
+				MaskEnd:   128,
 				MaskStart: 0,
 			},
 			expectedErr: nil,
@@ -166,7 +166,7 @@ func TestParseIPPattern(t *testing.T) {
 					0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 				}},
-				MaskEnd:  10,
+				MaskEnd:   10,
 				MaskStart: 0,
 			},
 			expectedErr: nil,
@@ -179,7 +179,7 @@ func TestParseIPPattern(t *testing.T) {
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
 				}},
-				MaskEnd:  128,
+				MaskEnd:   128,
 				MaskStart: 119,
 			},
 			expectedErr: nil,
@@ -192,7 +192,7 @@ func TestParseIPPattern(t *testing.T) {
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 					0xab, 0xcd, 0x01, 0xff, 0xfe, 0x00, 0x00, 0x00,
 				}},
-				MaskEnd:  104,
+				MaskEnd:   104,
 				MaskStart: 64,
 			},
 			expectedErr: nil,

@@ -276,7 +276,7 @@ func ParsePattern(s string) (Pattern, error) {
 	}
 
 	maskStart := 0
-	maskEnd := len(ip.Bytes())*8
+	maskEnd := len(ip.Bytes()) * 8
 	for i := 0; i < len(masks); i++ {
 		if masks[i] == "" {
 			continue
