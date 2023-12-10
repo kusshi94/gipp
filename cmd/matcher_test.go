@@ -148,7 +148,7 @@ func TestParseIPPattern(t *testing.T) {
 		{
 			description: "IPv6 No Mask Pattern",
 			pattern:     "2001:db8::abcd:01ff:fe00:0",
-			expectedPattern: cmd.IPv6Pattern{
+			expectedPattern: cmd.Pattern{
 				IP: cmd.IPv6Address{IP: [16]byte{
 					0x20, 0x01, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00,
 					0xab, 0xcd, 0x01, 0xff, 0xfe, 0x00, 0x00, 0x00,
@@ -161,7 +161,7 @@ func TestParseIPPattern(t *testing.T) {
 		{
 			description: "IPv6 Prefix Pattern",
 			pattern:     "fe80::/10",
-			expectedPattern: cmd.IPv6Pattern{
+			expectedPattern: cmd.Pattern{
 				IP: cmd.IPv6Address{IP: [16]byte{
 					0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -174,7 +174,7 @@ func TestParseIPPattern(t *testing.T) {
 		{
 			description: "IPv6 Suffix Pattern",
 			pattern:     "::100/-9",
-			expectedPattern: cmd.IPv6Pattern{
+			expectedPattern: cmd.Pattern{
 				IP: cmd.IPv6Address{IP: [16]byte{
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00,
@@ -187,7 +187,7 @@ func TestParseIPPattern(t *testing.T) {
 		{
 			description: "IPv6 Prefix and Suffix Pattern",
 			pattern:     "::abcd:01ff:fe00:0/-64/104",
-			expectedPattern: cmd.IPv6Pattern{
+			expectedPattern: cmd.Pattern{
 				IP: cmd.IPv6Address{IP: [16]byte{
 					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 					0xab, 0xcd, 0x01, 0xff, 0xfe, 0x00, 0x00, 0x00,

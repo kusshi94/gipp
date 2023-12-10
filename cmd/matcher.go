@@ -225,41 +225,19 @@ func parseIPv4(ip string) (IPAddress, error) {
 	return IPv4Address{IP: ipBytes}, nil
 }
 
-type Pattern interface {
-	Match(ip IPAddress) bool
-}
-
-type IPv6Pattern struct {
-	IP        IPv6Address
-	MaskEnd   int
+type Pattern struct {
+	IP        IPAddress
 	MaskStart int
+	MaskEnd   int
 }
 
-func (p IPv6Pattern) Match(ip IPAddress) bool {
-	if ip.Version() != 6 {
+func (p Pattern) Match(ip IPAddress) bool {
+	if ip.Version() != p.IP.Version() {
 		return false
 	}
 	ipBytes := ip.Bytes()
 	for i := p.MaskStart; i < p.MaskEnd; i++ {
-		if ipBytes[i] != p.IP.IP[i] {
-			return false
-		}
-	}
-	return true
-}
-
-type IPv4Pattern struct {
-	IP   IPv4Address
-	Mask [4]byte
-}
-
-func (p IPv4Pattern) Match(ip IPAddress) bool {
-	if ip.Version() != 4 {
-		return false
-	}
-	ipBytes := ip.Bytes()
-	for i := 0; i < 32; i++ {
-		if ipBytes[i] != p.IP.IP[i]&p.Mask[i] {
+		if ipBytes[i] != p.IP.Bytes()[i] {
 			return false
 		}
 	}
@@ -267,22 +245,6 @@ func (p IPv4Pattern) Match(ip IPAddress) bool {
 }
 
 func ParsePattern(s string) (Pattern, error) {
-	for i := 0; i < len(s); i++ {
-		if s[i] == '.' {
-			return parseIPv4Pattern(s)
-		}
-		if s[i] == ':' {
-			return parseIPv6Pattern(s)
-		}
-	}
-	return nil, ErrInvalidIP
-}
-
-func parseIPv4Pattern(s string) (Pattern, error) {
-	return nil, nil
-}
-
-func parseIPv6Pattern(s string) (Pattern, error) {
 	// IPアドレスの部分を取り出す
 	var ipPart string
 	if strings.Contains(s, "/") {
@@ -293,7 +255,7 @@ func parseIPv6Pattern(s string) (Pattern, error) {
 	}
 	ip, err := ParseIp(ipPart)
 	if err != nil {
-		return nil, err
+		return Pattern{}, err
 	}
 
 	// マスクの部分を取り出す
@@ -314,17 +276,17 @@ func parseIPv6Pattern(s string) (Pattern, error) {
 	}
 
 	maskStart := 0
-	maskEnd := 128
+	maskEnd := len(ip.Bytes())*8
 	for i := 0; i < len(masks); i++ {
 		if masks[i] == "" {
 			continue
 		}
 		masklen, err := strconv.Atoi(masks[i])
 		if err != nil {
-			return nil, ErrInvalidPattern
+			return Pattern{}, ErrInvalidPattern
 		}
-		if masklen < -128 || masklen > 128 || masklen == 0 {
-			return nil, ErrInvalidPattern
+		if masklen < -len(ip.Bytes())*8 || masklen > len(ip.Bytes())*8 || masklen == 0 {
+			return Pattern{}, ErrInvalidPattern
 		}
 
 		// Prefix指定の場合
@@ -333,11 +295,11 @@ func parseIPv6Pattern(s string) (Pattern, error) {
 		}
 		// Suffix指定の場合
 		if masklen < 0 {
-			maskStart = 128 + masklen
+			maskStart = len(ip.Bytes())*8 + masklen
 		}
 	}
 
-	return IPv6Pattern{
+	return Pattern{
 		IP:        ip.(IPv6Address),
 		MaskEnd:   maskEnd,
 		MaskStart: maskStart,
