@@ -4,7 +4,6 @@ Copyright © 2023 J.Kushibiki
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"os"
 
@@ -12,6 +11,8 @@ import (
 )
 
 func NewRootCmd() *cobra.Command {
+	var patterns []string
+
 	cmd := &cobra.Command{
 		Use:   "gipp [flags] [-e pattern] [file ...]",
 		Short: "IP Prefix/Suffix Version of grep",
@@ -24,18 +25,39 @@ following are examples of the pattern:
 	::abcd:01ff:fe00:0/-64/24`,
 		DisableFlagsInUseLine: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return run(os.Stdin, os.Stdout, os.Stderr, args)
+			// with files
+			if len(args) > 0 {
+				// open files
+				var files []io.Reader
+				for _, arg := range args {
+					f, err := os.Open(arg)
+					if err != nil {
+						return err
+					}
+					defer f.Close()
+					files = append(files, f)
+				}
+				// concat files
+				reader := io.MultiReader(files...)
+				// run gipp
+				return run(reader, os.Stdout, os.Stderr, patterns)
+			}
+
+			// without files
+			return run(os.Stdin, os.Stdout, os.Stderr, patterns)
 		},
 	}
 
-	var pattern string
-	cmd.Flags().StringVarP(&pattern, "pattern", "e", "", "pattern")
+	cmd.Flags().StringSliceVarP(&patterns, "pattern", "e", []string{}, "pattern")
+
+	cmd.SetOut(os.Stdout)
+	cmd.SetErr(os.Stderr)
 
 	return cmd
 }
 
-func run(in io.Reader, out, eout io.Writer, files []string) error {
-	fmt.Fprintln(out, "Hello, gipp!")
+func run(in io.Reader, out, eout io.Writer, patterns []string) error {
+	io.Copy(out, in)
 	return nil
 }
 
