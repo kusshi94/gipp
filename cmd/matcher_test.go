@@ -146,7 +146,7 @@ func TestParseIPPattern(t *testing.T) {
 		expectedErr     error
 	}{
 		{
-			description: "IPv6 No Mask Pattern",
+			description: "IPv6 No Masks Pattern",
 			pattern:     "2001:db8::abcd:01ff:fe00:0",
 			expectedPattern: cmd.Pattern{
 				IP: cmd.IPv6Address{IP: [16]byte{
@@ -197,6 +197,76 @@ func TestParseIPPattern(t *testing.T) {
 			},
 			expectedErr: nil,
 		},
+		{
+			description: "IPv6 Invalid Pattern",
+			pattern:     "::abcd:01ff:fe00:0/-64/129",
+			expectedPattern: cmd.Pattern{
+				IP:         nil,
+				MaskEnd:    0,
+				MaskStart:  0,
+			},
+			expectedErr: cmd.ErrInvalidPattern,
+		},
+		{
+			description: "IPv6 Invalid Pattern",
+			pattern:     "::abcd:01ff:fe00:0/-129",
+			expectedPattern: cmd.Pattern{
+				IP:         nil,
+				MaskEnd:    0,
+				MaskStart:  0,
+			},
+			expectedErr: cmd.ErrInvalidPattern,
+		},
+		{
+			description: "IPv4 No Masks Pattern",
+			pattern:     "192.168.1.100",
+			expectedPattern: cmd.Pattern{
+				IP: cmd.IPv4Address{IP: [4]byte{192, 168, 1, 100}},
+				MaskEnd:   32,
+				MaskStart: 0,
+			},
+			expectedErr: nil,
+		},
+		{
+			description: "IPv4 Prefix Pattern",
+			pattern:     "192.168.1.0/24",
+			expectedPattern: cmd.Pattern{
+				IP: cmd.IPv4Address{IP: [4]byte{192, 168, 1, 0}},
+				MaskEnd:   24,
+				MaskStart: 0,
+			},
+			expectedErr: nil,
+		},
+		{
+			description: "IPv4 Suffix Pattern",
+			pattern:     "0.0.0.1/-8",
+			expectedPattern: cmd.Pattern{
+				IP: cmd.IPv4Address{IP: [4]byte{0, 0, 0, 1}},
+				MaskEnd:   32,
+				MaskStart: 24,
+			},
+			expectedErr: nil,
+		},
+		{
+			description: "IPv4 Prefix and Suffix Pattern",
+			pattern:     "0.0.100.0/-16/24",
+			expectedPattern: cmd.Pattern{
+				IP: cmd.IPv4Address{IP: [4]byte{0, 0, 100, 0}},
+				MaskEnd:   24,
+				MaskStart: 16,
+			},
+			expectedErr: nil,
+		},
+		{
+			description: "IPv4 Invalid Pattern",
+			pattern:     "192.168.1.0/-33",
+			expectedPattern: cmd.Pattern{
+				IP:         nil,
+				MaskEnd:    0,
+				MaskStart:  0,
+			},
+			expectedErr: cmd.ErrInvalidPattern,
+		},
 	}
 
 	for _, tc := range testCases {
@@ -206,9 +276,6 @@ func TestParseIPPattern(t *testing.T) {
 		}
 		if err != tc.expectedErr {
 			t.Errorf("expected error: %v, got: %v", tc.expectedErr, err)
-		}
-		if err != nil {
-			t.Errorf("expected error: %v, got: %v", nil, err)
 		}
 	}
 }

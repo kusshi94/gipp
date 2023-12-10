@@ -300,7 +300,7 @@ func ParsePattern(s string) (Pattern, error) {
 	}
 
 	return Pattern{
-		IP:        ip.(IPv6Address),
+		IP:        ip,
 		MaskEnd:   maskEnd,
 		MaskStart: maskStart,
 	}, nil
