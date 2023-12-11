@@ -237,7 +237,9 @@ func (p Pattern) Match(ip IPAddress) bool {
 	}
 	ipBytes := ip.Bytes()
 	for i := p.MaskStart; i < p.MaskEnd; i++ {
-		if ipBytes[i] != p.IP.Bytes()[i] {
+		ipBytesBit := ipBytes[i/8] & (1 << (7 - i%8))
+		pBytesBit := p.IP.Bytes()[i/8] & (1 << (7 - i%8))
+		if ipBytesBit^pBytesBit > 0 {
 			return false
 		}
 	}

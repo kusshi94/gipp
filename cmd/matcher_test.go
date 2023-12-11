@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -276,6 +277,139 @@ func TestParseIPPattern(t *testing.T) {
 		}
 		if err != tc.expectedErr {
 			t.Errorf("expected error: %v, got: %v", tc.expectedErr, err)
+		}
+	}
+}
+
+func TestIPPatternMatch(t *testing.T) {
+	testCases := []struct {
+		description string
+		pattern     string
+		ip          string
+		expected    bool
+	}{
+		{
+			description: "IPv6 No Masks Pattern",
+			pattern:     "2001:db8::abcd:1ff:fe00:0",
+			ip:          "2001:db8::abcd:1ff:fe00:0",
+			expected:    true,
+		},
+		{
+			description: "IPv6 /128 Pattern",
+			pattern:     "2001:db8::abcd:1ff:fe00:0/128",
+			ip:          "2001:db8::abcd:1ff:fe00:0",
+			expected:    true,
+		},
+		{
+			description: "IPv6 /64 Pattern",
+			pattern:     "2001:db8::/64",
+			ip:          "2001:db8::abcd:1ff:fe00:0",
+			expected:    true,
+		},
+		{
+			description: "IPv6 /-64 Pattern",
+			pattern:     "0::abcd:1ff:fe00:0/-64",
+			ip:          "2001:db8::abcd:1ff:fe00:0",
+			expected:    true,
+		},
+		{
+			description: "IPv6 EUI-64 Pattern",
+			pattern:     "::abcd:1ff:fe00:0/-64/104",
+			ip:          "2001:db8::abcd:1ff:fe00:0",
+			expected:    true,
+		},
+		{
+			description: "IPv6 No Masks and No Match Pattern",
+			pattern:     "2001:db8::abcd:1ff:fe00:0",
+			ip:          "2001:db8::abcd:1ff:fe00:1",
+			expected:    false,
+		},
+		{
+			description: "IPv6 /128 and No Match Pattern",
+			pattern:     "2001:db8::abcd:1ff:fe00:0/128",
+			ip:          "2001:db8::abcd:1ff:fe00:1",
+			expected:    false,
+		},
+		{
+			description: "IPv6 /64 and No Match Pattern",
+			pattern:     "2001:db8:100::/64",
+			ip:          "2001:db8:200::abcd:1ff:fe00:1",
+			expected:    false,
+		},
+		{
+			description: "IPv6 /-64 and No Match Pattern",
+			pattern:     "::ef01:1ff:fe00:0/-64",
+			ip:          "2001:db8::abcd:1ff:fe00:1",
+			expected:    false,
+		},
+		{
+			description: "IPv6 EUI-64 and No Match Pattern",
+			pattern:     "::ef01:1ff:fe00:0/-64/104",
+			ip:          "2001:db8::abcd:1ff:fe00:1",
+			expected:    false,
+		},
+		{
+			description: "IPv4 No Masks Pattern",
+			pattern:     "192.168.100.1",
+			ip:          "192.168.100.1",
+			expected:    true,
+		},
+		{
+			description: "IPv4 /32 Pattern",
+			pattern:     "192.168.100.1/32",
+			ip:          "192.168.100.1",
+			expected:    true,
+		},
+		{
+			description: "IPv4 /24 Pattern",
+			pattern:     "192.168.100.0/24",
+			ip:          "192.168.100.1",
+			expected:    true,
+		},
+		{
+			description: "IPv4 /-8 Pattern",
+			pattern:     "0.0.0.101/-8",
+			ip:          "192.168.100.101",
+			expected:    true,
+		},
+		{
+			description: "IPv4 No Masks and No Match Pattern",
+			pattern:     "192.168.100.1",
+			ip:          "10.0.0.1",
+			expected:    false,
+		},
+		{
+			description: "IPv4 /32 and No Match Pattern",
+			pattern:     "192.168.100.1/32",
+			ip:          "10.0.0.1",
+			expected:    false,
+		},
+		{
+			description: "IPv4 /24 and No Match Pattern",
+			pattern:     "192.168.100.0/24",
+			ip:          "10.0.0.1",
+			expected:    false,
+		},
+		{
+			description: "IPv4 /-24 and No Match Pattern",
+			pattern:     "0.0.0.101/-24",
+			ip:          "10.0.0.1",
+			expected:    false,
+		},
+	}
+
+	for _, tc := range testCases {
+		fmt.Println(tc.description)
+		pattern, err := cmd.ParsePattern(tc.pattern)
+		if err != nil {
+			t.Errorf("parse pattern: unexpected error: %v", err)
+		}
+		ip, err := cmd.ParseIp(tc.ip)
+		if err != nil {
+			t.Errorf("parse ip: unexpected error: %v", err)
+		}
+		if pattern.Match(ip) != tc.expected {
+			t.Errorf("expected: %v, got: %v", tc.expected, pattern.Match(ip))
 		}
 	}
 }
