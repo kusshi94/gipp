@@ -1,8 +1,10 @@
 package cmd_test
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/kusshi94/gipp/cmd"
@@ -412,4 +414,73 @@ func TestIPPatternMatch(t *testing.T) {
 			t.Errorf("expected: %v, got: %v", tc.expected, pattern.Match(ip))
 		}
 	}
+}
+
+func TestRunFunc(t *testing.T) {
+	testCases := []struct {
+		description string
+		patterns    []string
+		input       string
+		expected    string
+	}{
+		{
+			description: "",
+			patterns: []string{
+				"192.168.57.0/24",
+				"10.222.0.0/16",
+				"fe80::5400:0:0:0/72",
+			},
+			input: `192.168.176.105
+192.168.207.29
+10.133.107.21
+172.22.6.67
+10.222.200.200
+10.223.254.126
+10.174.2.18
+172.25.172.33
+192.168.179.165
+192.168.57.163
+172.22.246.192
+10.113.99.252
+192.168.107.4
+192.168.57.4
+192.168.46.194
+fe80::3454:183e:39aa:9a3a
+fe80::bc89:45d2:38e0:f715
+fe80::3960:a43f:df0d:3f90
+fe80::2d9d:af52:5ce3:bf10
+fe80::9e50:ffc3:85b6:be65
+fe80::1a51:6f53:c20f:e2fb
+fe80::809c:cf3b:25a0:c3b4
+fe80::a837:14a4:1069:7ae4
+fe80::6800:b8a1:dc84:4b78
+fe80::d0da:cb6e:5125:ddff
+fe80::5474:3fa5:9fca:99f3
+fe80::6690:fb06:8824:fbf1
+fe80::f738:2998:45ea:97c4
+fe80::77bc:c97c:2f71:22b6
+fe80::4493:f163:e9c5:31bd`,
+			expected: `10.222.200.200
+192.168.57.163
+192.168.57.4
+fe80::5474:3fa5:9fca:99f3
+`,
+		},
+	}
+
+	for _, tc := range testCases {
+		fmt.Println(tc.description)
+		outbuf := &bytes.Buffer{}
+		eoutbuf := &bytes.Buffer{}
+		cmd.Run(
+			strings.NewReader(tc.input),
+			outbuf,
+			eoutbuf,
+			tc.patterns,
+		)
+		if outbuf.String() != tc.expected {
+			t.Errorf("expected: %v, got: %v", tc.expected, outbuf.String())
+		}
+	}
+
 }

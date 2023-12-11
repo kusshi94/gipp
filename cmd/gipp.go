@@ -4,6 +4,8 @@ Copyright © 2023 J.Kushibiki
 package cmd
 
 import (
+	"bufio"
+	"fmt"
 	"io"
 	"os"
 
@@ -25,6 +27,11 @@ following are examples of the pattern:
 	::abcd:01ff:fe00:0/-64/24`,
 		DisableFlagsInUseLine: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// check if patterns are specified
+			if len(patterns) == 0 {
+				return fmt.Errorf("no patterns specified")
+			}
+
 			// with files
 			if len(args) > 0 {
 				// open files
@@ -40,11 +47,11 @@ following are examples of the pattern:
 				// concat files
 				reader := io.MultiReader(files...)
 				// run gipp
-				return run(reader, os.Stdout, os.Stderr, patterns)
+				return Run(reader, os.Stdout, os.Stderr, patterns)
 			}
 
 			// without files
-			return run(os.Stdin, os.Stdout, os.Stderr, patterns)
+			return Run(os.Stdin, os.Stdout, os.Stderr, patterns)
 		},
 	}
 
@@ -56,8 +63,35 @@ following are examples of the pattern:
 	return cmd
 }
 
-func run(in io.Reader, out, eout io.Writer, patterns []string) error {
-	io.Copy(out, in)
+func Run(in io.Reader, out, eout io.Writer, ps []string) error {
+	// load patterns
+	patterns := make([]Pattern, len(ps))
+	for i, p := range ps {
+		pattern, err := ParsePattern(p)
+		if err != nil {
+			return err
+		}
+		patterns[i] = pattern
+	}
+
+	// read input stream line by line
+	sc := bufio.NewScanner(in)
+	for sc.Scan() {
+		line := sc.Text()
+		// parse line
+		ip, err := ParseIp(line)
+		if err != nil {
+			continue
+		}
+
+		// match patterns
+		for _, pattern := range patterns {
+			if pattern.Match(ip) {
+				fmt.Fprintln(out, line)
+			}
+		}
+	}
+
 	return nil
 }
 
