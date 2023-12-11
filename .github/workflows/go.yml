@@ -5,9 +5,11 @@ name: Go
 
 on:
   push:
-    branches: [ "main" ]
+    paths:
+      - '**.go'
   pull_request:
-    branches: [ "main" ]
+    paths:
+      - "**.go"
   workflow_dispatch:
 
 jobs:
@@ -27,3 +29,10 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Format
+      run: |
+        if [ -n "$(go fmt ./...)" ]; then
+          echo "Go code is not formatted, please run 'go fmt ./...'"
+          exit 1
+        fi
