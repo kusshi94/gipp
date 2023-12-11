@@ -131,6 +131,7 @@ func TestParseIp(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		fmt.Println(tc.description)
 		ip, err := cmd.ParseIp(tc.ipStr)
 		if !reflect.DeepEqual(ip, tc.expectedIP) {
 			t.Errorf("expected IP: %v, got: %v", tc.expectedIP, ip)
@@ -273,6 +274,7 @@ func TestParseIPPattern(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		fmt.Println(tc.description)
 		pattern, err := cmd.ParsePattern(tc.pattern)
 		if !reflect.DeepEqual(pattern, tc.expectedPattern) {
 			t.Errorf("expected pattern: %v, got: %v", tc.expectedPattern, pattern)
