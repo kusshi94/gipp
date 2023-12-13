@@ -69,7 +69,7 @@ func Run(in io.Reader, out, eout io.Writer, ps []string) error {
 	for i, p := range ps {
 		pattern, err := ParsePattern(p)
 		if err != nil {
-			return err
+			return fmt.Errorf("invalid pattern: %s", p)
 		}
 		patterns[i] = pattern
 	}
