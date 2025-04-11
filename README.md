@@ -12,7 +12,7 @@ brew install kusshi94/tap/gipp
 with `go install`:
 
 ```bash
-go install github.com/kusshi/gipp@latest
+go install github.com/kusshi94/gipp@latest
 ```
 
 ## Usage
